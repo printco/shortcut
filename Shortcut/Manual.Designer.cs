@@ -32,6 +32,8 @@ namespace Shortcut
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Manual));
             this.treeViewFiles = new System.Windows.Forms.TreeView();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.createFolder = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.addFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.addFile = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -40,8 +42,6 @@ namespace Shortcut
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
             this.nodeImageList = new System.Windows.Forms.ImageList(this.components);
-            this.createFolder = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -72,50 +72,62 @@ namespace Shortcut
             this.toolStripSeparator2,
             this.toolStripMenuItem4});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(153, 176);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(143, 154);
+            // 
+            // createFolder
+            // 
+            this.createFolder.Name = "createFolder";
+            this.createFolder.Size = new System.Drawing.Size(142, 22);
+            this.createFolder.Text = "Create folder";
+            this.createFolder.Click += new System.EventHandler(this.createFolder_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(139, 6);
             // 
             // addFolder
             // 
             this.addFolder.Name = "addFolder";
-            this.addFolder.Size = new System.Drawing.Size(152, 22);
+            this.addFolder.Size = new System.Drawing.Size(142, 22);
             this.addFolder.Text = "Add Folder";
             this.addFolder.Click += new System.EventHandler(this.addFolder_Click);
             // 
             // addFile
             // 
             this.addFile.Name = "addFile";
-            this.addFile.Size = new System.Drawing.Size(152, 22);
+            this.addFile.Size = new System.Drawing.Size(142, 22);
             this.addFile.Text = "Add File";
             this.addFile.Click += new System.EventHandler(this.addFile_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(139, 6);
             // 
             // renameFolder
             // 
             this.renameFolder.Name = "renameFolder";
-            this.renameFolder.Size = new System.Drawing.Size(152, 22);
+            this.renameFolder.Size = new System.Drawing.Size(142, 22);
             this.renameFolder.Text = "Rename";
             this.renameFolder.Click += new System.EventHandler(this.renameFolder_Click);
             // 
             // deleteItem
             // 
             this.deleteItem.Name = "deleteItem";
-            this.deleteItem.Size = new System.Drawing.Size(152, 22);
+            this.deleteItem.Size = new System.Drawing.Size(142, 22);
             this.deleteItem.Text = "Delete";
             this.deleteItem.Click += new System.EventHandler(this.deleteItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(139, 6);
             // 
             // toolStripMenuItem4
             // 
             this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-            this.toolStripMenuItem4.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItem4.Size = new System.Drawing.Size(142, 22);
             this.toolStripMenuItem4.Text = "Open";
             // 
             // nodeImageList
@@ -128,18 +140,6 @@ namespace Shortcut
             this.nodeImageList.Images.SetKeyName(3, "shortcut.png");
             this.nodeImageList.Images.SetKeyName(4, "file.png");
             // 
-            // createFolder
-            // 
-            this.createFolder.Name = "createFolder";
-            this.createFolder.Size = new System.Drawing.Size(152, 22);
-            this.createFolder.Text = "Create folder";
-            this.createFolder.Click += new System.EventHandler(this.createFolder_Click);
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(149, 6);
-            // 
             // Manual
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -151,6 +151,7 @@ namespace Shortcut
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
             this.Text = "Manual";
             this.Load += new System.EventHandler(this.Manual_Load);
+            this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Manual_MouseClick);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Manual_FormClosing);
             this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);

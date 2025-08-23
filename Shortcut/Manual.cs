@@ -82,6 +82,8 @@ namespace Shortcut
 
             // Important: Call Save() to persist the changes to the user.config file.
             Properties.Settings.Default.Save();
+
+            SaveTreeData();
         }
 
         private void Manual_Load(object sender, EventArgs e)
@@ -199,7 +201,9 @@ namespace Shortcut
                 // Not selected, Add new parent node
                 if (inputDlg.ShowDialog() == DialogResult.OK)
                 {
-                    TreeNode newParentNode = new TreeNode(inputDlg.getValue());
+                    string nodeName = inputDlg.getValue();
+                    TreeNode newParentNode = new TreeNode(nodeName);
+                    newParentNode.Tag = new FolderItem(nodeName);
                     int imageIndex = inputDlg.getImageIndex();
                     newParentNode.ImageIndex = imageIndex;
                     newParentNode.SelectedImageIndex = imageIndex;
@@ -273,8 +277,8 @@ namespace Shortcut
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine("No saved tree data found at: {0}. Populating with drives.", filePath);
-                PopulateDriveNodes(); // Initial population if no file exists
+                System.Diagnostics.Debug.WriteLine("No saved tree data found at: " + filePath + ". Populating with drives.");
+                // PopulateDriveNodes(); // Initial population if no file exists
             }
         }
 
@@ -298,7 +302,7 @@ namespace Shortcut
                 {
                     serializer.Serialize(writer, dataToSave);
                 }
-                System.Diagnostics.Debug.WriteLine("Tree data saved to: {0}", filePath);
+                System.Diagnostics.Debug.WriteLine("Tree data saved to: "+ filePath);
             }
             catch (Exception ex)
             {
@@ -451,6 +455,11 @@ namespace Shortcut
                 node.ImageIndex = -1; // No icon assigned
                 node.SelectedImageIndex = -1; // No icon assigned
             }
+        }
+
+        private void Manual_MouseClick(object sender, MouseEventArgs e)
+        {
+            treeViewFiles.SelectedNode = null;
         }
 
     }
