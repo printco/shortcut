@@ -138,8 +138,7 @@ namespace Shortcut
             this.textBoxDescription.Size = new System.Drawing.Size(271, 126);
             this.textBoxDescription.TabIndex = 23;
             this.textBoxDescription.TabStop = false;
-            this.textBoxDescription.Text = "https://github.com/printco/shortcut\r\n\r\nใช้ Visual C# 2005 เขียนถ้ามี bug ก็ไปแก้ไ" +
-                "ขเองได้เลย";
+            this.textBoxDescription.Text = "Description";
             // 
             // okButton
             // 

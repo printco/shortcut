@@ -86,19 +86,19 @@
     <Compile Include="InputDialog.Designer.cs">
       <DependentUpon>InputDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Manual.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Manual.Designer.cs">
-      <DependentUpon>Manual.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SerializableTreeNodeData.cs" />
-    <Compile Include="Settings.cs" />
     <Compile Include="Shortcut.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Shortcut.Designer.cs">
       <DependentUpon>Shortcut.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SerializableTreeNodeData.cs" />
+    <Compile Include="Settings.cs" />
+    <Compile Include="OriginalAI.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OriginalAI.Designer.cs">
+      <DependentUpon>OriginalAI.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -118,13 +118,13 @@
       <SubType>Designer</SubType>
       <DependentUpon>InputDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Manual.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>Manual.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Shortcut.resx">
       <SubType>Designer</SubType>
       <DependentUpon>Shortcut.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OriginalAI.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>OriginalAI.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

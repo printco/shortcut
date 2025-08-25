@@ -14,7 +14,7 @@ namespace Shortcut
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Manual());
+            Application.Run(new Shortcut());
         }
     }
 }

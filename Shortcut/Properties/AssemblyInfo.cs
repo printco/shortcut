@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Shortcut")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("https://github.com/printco/shortcut มีปัญหาก็ไปแก้ไขเองได้เลย เขียนด้วย Visual C# 2005")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Lae")]
 [assembly: AssemblyProduct("Shortcut")]
 [assembly: AssemblyCopyright("Copyright ©  2025")]
 [assembly: AssemblyTrademark("")]
