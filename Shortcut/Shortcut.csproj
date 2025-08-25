@@ -10,7 +10,7 @@
     <RootNamespace>Shortcut</RootNamespace>
     <AssemblyName>Shortcut</AssemblyName>
     <StartupObject>Shortcut.Program</StartupObject>
-    <ApplicationIcon>shortcut.ico</ApplicationIcon>
+    <ApplicationIcon>app-icon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -40,6 +40,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BaseTreeItem.cs" />
+    <Compile Include="DragIntoTreeView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DragIntoTreeView.Designer.cs">
+      <DependentUpon>DragIntoTreeView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FileItem.cs" />
     <Compile Include="FolderItem.cs" />
     <Compile Include="IconDialog.cs">
       <SubType>Form</SubType>
@@ -70,6 +78,10 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="DragIntoTreeView.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>DragIntoTreeView.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="IconDialog.resx">
       <SubType>Designer</SubType>
       <DependentUpon>IconDialog.cs</DependentUpon>
@@ -105,9 +117,11 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="TreeItem.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="app-icon.ico" />
     <Content Include="shortcut.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

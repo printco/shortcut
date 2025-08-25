@@ -18,7 +18,10 @@ namespace Shortcut
         // Dictionary to cache icon indices for performance and resource management
         private Dictionary<string, int> driveIconPathToIndexMap = new Dictionary<string, int>();
         private int nextIconIndex = 0; // Tracks the next available index in imageListTreeView
-
+        // --- Add a class-level list to temporarily store nodes that need to be expanded ---
+        private List<TreeNode> nodesToExpandOnShown = new List<TreeNode>();
+        // Keep track of the node being dragged
+        private TreeNode _draggedNode;
 
         public Manual()
         {
@@ -129,7 +132,114 @@ namespace Shortcut
 
         private void addFolder_Click(object sender, EventArgs e)
         {
-            
+            TreeNode selectedNode = treeViewFiles.SelectedNode;
+
+            FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
+            folderBrowserDialog.Description = "Select folder";
+            folderBrowserDialog.ShowNewFolderButton = true; // Allow user to create new folders
+
+            if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
+            {
+                string selectedFolderPath = folderBrowserDialog.SelectedPath; // Get the full path of the selected folder
+                toolStripStatusLabel1.Text = selectedFolderPath;
+
+                if (selectedNode == null)
+                {
+                    // Create new node as root
+                    string folderName = Path.GetFileName(selectedFolderPath);
+                    TreeNode nodeFromSelect = new TreeNode(folderName);
+                    TreeItem treeItem = new TreeItem();
+                    treeItem.IsFile = false;
+                    treeItem.Name = folderName;
+                    nodeFromSelect.Tag = treeItem;
+                    treeViewFiles.Nodes.Add(nodeFromSelect);
+                    selectedNode = nodeFromSelect;
+                    treeViewFiles.SelectedNode = selectedNode;
+                    RecursiveFolder(selectedNode, selectedFolderPath, 0);
+                }
+
+            }
+        }
+
+        /// <summary>
+        /// Recursively scans a directory for all files and subdirectories.
+        /// </summary>
+        /// <param name="currentDirectory">The directory path to scan.</param>
+        /// <param name="depth">The current recursion depth (for indentation).</param>
+        private void RecursiveFolder(TreeNode parentNode, string currentDirectory, int depth)
+        {
+            // Create indentation for clearer output
+            string indent = new string(' ', depth * 4);
+            System.Diagnostics.Debug.WriteLine(string.Format("{0}Scanning Directory: {1}", indent, currentDirectory));
+            // _foundPaths.Add(currentDirectory); // Add current directory to the list
+
+            try
+            {
+                // --- Get and Process Files in the current directory ---
+                string[] files = Directory.GetFiles(currentDirectory);
+                foreach (string file in files)
+                {
+                    TreeNode newNode = new TreeNode();
+                    string baseName = Path.GetFileName(file);
+                    System.Diagnostics.Debug.WriteLine(string.Format("{0}    File: {1}", indent, baseName));
+                    Icon icon = utils.GetFileIcon(file);
+                    string imageKey = "folder";
+                    if (icon != null)
+                    {
+                        string iconExtension = Path.GetExtension(file);
+                        nodeImageList.Images.Add(iconExtension, icon);
+                        imageKey = iconExtension;
+                    }
+                    TreeItem fileItem = new TreeItem();
+                    fileItem.Name = baseName;
+                    fileItem.IsFile = true;
+                    fileItem.FullPath = file;
+
+                    newNode.Text = baseName;
+                    newNode.Tag = fileItem;
+                    newNode.ImageKey = imageKey;
+                    newNode.SelectedImageKey = imageKey;
+                    parentNode.Nodes.Add(newNode);                    
+                }
+
+                // --- Get Subdirectories and Recurse ---
+                string[] subDirectories = Directory.GetDirectories(currentDirectory);
+                foreach (string subDir in subDirectories)
+                {
+                    string baseName = Path.GetFileName(subDir);
+                    TreeItem folderItem = new TreeItem();
+                    folderItem.IsFile = false;
+                    folderItem.Name = baseName;
+
+                    TreeNode nextNode = new TreeNode();
+                    nextNode.Text = baseName;
+                    nextNode.Name = baseName;
+                    nextNode.Tag = folderItem;
+
+                    string imageKey = "folder";
+
+                    nextNode.ImageKey = imageKey;
+                    nextNode.SelectedImageKey = imageKey;
+                    parentNode.Nodes.Add(nextNode);
+                    // Recursively call the method for each subdirectory
+                    RecursiveFolder(nextNode, subDir, depth + 1);
+                }
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Handle cases where the application does not have permission to access a directory
+                System.Diagnostics.Debug.WriteLine(string.Format("{0}    ACCESS DENIED: Cannot access directory {1}", indent, currentDirectory));
+            }
+            catch (IOException ex)
+            {
+                // Handle other I/O errors (e.g., disk not ready, file in use)
+                System.Diagnostics.Debug.WriteLine(string.Format("{0}    I/O Error in {1}: {2}", indent, currentDirectory, ex.Message));
+            }
+            catch (Exception ex)
+            {
+                // Catch any other unexpected errors
+                System.Diagnostics.Debug.WriteLine(string.Format("{0}    Error in {1}: {2}", indent, currentDirectory, ex.Message));
+            }
         }
 
         private void renameFolder_Click(object sender, EventArgs e)
@@ -153,41 +263,23 @@ namespace Shortcut
             if (!string.IsNullOrEmpty(newName) && newName != currentName)
             {
                 selectedNode.Text = newName;
-
-                if (selectedNode.Tag is FolderItem)
+                TreeItem treeItem = selectedNode.Tag as TreeItem;
+                if (treeItem.IsFile)
                 {
-                    FolderItem folderItem = (FolderItem)selectedNode.Tag;
-                    folderItem.FolderName = newName;
+                    TreeItem TreeItem = (TreeItem)selectedNode.Tag;
+                    TreeItem.Name = newName;
                 }
-                else if (selectedNode.Tag is FileItem)
+                else
                 {
-                    FileItem fileItem = (FileItem)selectedNode.Tag;
-                    fileItem.DisplayName = newName;
+                    TreeItem TreeItem = (TreeItem)selectedNode.Tag;
+                    TreeItem.Name = newName;
                 }
             }
         }
 
         private void deleteItem_Click(object sender, EventArgs e)
         {
-            TreeNode selectedNode = treeViewFiles.SelectedNode;
-            if (selectedNode == null)
-            {
-                MessageBox.Show("Please select the item you want to delete.", "Warning",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            string itemType = (selectedNode.Tag is FolderItem) ? "Folder" : "File";
-            DialogResult result = MessageBox.Show(
-                string.Format("Delete {0} '{1}'?", itemType, selectedNode.Text),
-                "Confirm delete",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
-
-            if (result == DialogResult.Yes)
-            {
-                selectedNode.Remove();
-            }
+            deleteTreeNodeItem();
         }
 
         private void createFolder_Click(object sender, EventArgs e)
@@ -198,12 +290,13 @@ namespace Shortcut
 
             if (selectedNode == null)
             {
+                
                 // Not selected, Add new parent node
                 if (inputDlg.ShowDialog() == DialogResult.OK)
                 {
                     string nodeName = inputDlg.getValue();
                     TreeNode newParentNode = new TreeNode(nodeName);
-                    newParentNode.Tag = new FolderItem(nodeName);
+                    newParentNode.Tag = new TreeItem(nodeName, nodeName, true);
                     int imageIndex = inputDlg.getImageIndex();
                     newParentNode.ImageIndex = imageIndex;
                     newParentNode.SelectedImageIndex = imageIndex;
@@ -221,9 +314,11 @@ namespace Shortcut
                 if (!string.IsNullOrEmpty(inputName))
                 {
                     TreeNode newFolderNode = new TreeNode(inputName);
-                    newFolderNode.Tag = new FolderItem(inputName);
+                    newFolderNode.Tag = new TreeItem(inputName
+                        , selectedNode.FullPath + treeViewFiles.PathSeparator + inputName
+                        , false);
                     newFolderNode.ImageKey = "folder";
-                    newFolderNode.SelectedImageKey = "folder_open";
+                    newFolderNode.SelectedImageKey = "open-folder";
 
                     if (selectedNode != null)
                     {
@@ -246,7 +341,11 @@ namespace Shortcut
         private void LoadTreeData()
         {
             string filePath = Path.Combine(Application.LocalUserAppDataPath, TreeDataFileName);
+            ReadFileXML(filePath);
+        }
 
+        private void ReadFileXML(string filePath)
+        {
             if (File.Exists(filePath))
             {
                 try
@@ -265,7 +364,7 @@ namespace Shortcut
 
                         BuildTreeNodesFromSerializableData(treeViewFiles.Nodes, loadedData);
                     }
-                    System.Diagnostics.Debug.WriteLine("Tree data loaded from: {0}", filePath);
+                    System.Diagnostics.Debug.WriteLine("Tree data loaded from: " + filePath);
                 }
                 catch (Exception ex)
                 {
@@ -282,16 +381,11 @@ namespace Shortcut
             }
         }
 
-        /// <summary>
-        /// Saves the current TreeView structure to an XML file.
-        /// </summary>
-        private void SaveTreeData()
+        private void SaveFileXML(string filePath)
         {
-            string filePath = Path.Combine(Application.LocalUserAppDataPath, TreeDataFileName);
-            List<SerializableTreeNodeData> dataToSave = ConvertTreeNodesToSerializableData(treeViewFiles.Nodes);
-
             try
             {
+                List<SerializableTreeNodeData> dataToSave = ConvertTreeNodesToSerializableData(treeViewFiles.Nodes);
                 XmlSerializer serializer = new XmlSerializer(typeof(List<SerializableTreeNodeData>));
                 string directory = Path.GetDirectoryName(filePath);
                 if (!Directory.Exists(directory))
@@ -302,7 +396,7 @@ namespace Shortcut
                 {
                     serializer.Serialize(writer, dataToSave);
                 }
-                System.Diagnostics.Debug.WriteLine("Tree data saved to: "+ filePath);
+                System.Diagnostics.Debug.WriteLine("Tree data saved to: " + filePath);
             }
             catch (Exception ex)
             {
@@ -314,6 +408,15 @@ namespace Shortcut
         }
 
         /// <summary>
+        /// Saves the current TreeView structure to an XML file.
+        /// </summary>
+        private void SaveTreeData()
+        {
+            string filePath = Path.Combine(Application.LocalUserAppDataPath, TreeDataFileName);
+            SaveFileXML(filePath);
+        }
+
+        /// <summary>
         /// Converts the current TreeView nodes into a list of serializable data objects.
         /// </summary>
         private List<SerializableTreeNodeData> ConvertTreeNodesToSerializableData(TreeNodeCollection nodes)
@@ -321,10 +424,13 @@ namespace Shortcut
             List<SerializableTreeNodeData> serializableNodes = new List<SerializableTreeNodeData>();
             foreach (TreeNode node in nodes)
             {
-                FolderItem folderItem = node.Tag as FolderItem;
-                if (folderItem != null)
+                // C# 2.0 style: Cast to BaseTreeItem using 'as' operator
+                TreeItem itemData = node.Tag as TreeItem;
+                if (itemData != null) // Check for null after 'as' cast
                 {
-                    SerializableTreeNodeData serializableNode = new SerializableTreeNodeData(folderItem);
+                    // Recursive into children node
+                    SerializableTreeNodeData serializableNode = new SerializableTreeNodeData(itemData);
+                    serializableNode.IsExpanded = node.IsExpanded; // Capture the current expansion state
                     serializableNode.Children = ConvertTreeNodesToSerializableData(node.Nodes);
                     serializableNodes.Add(serializableNode);
                 }
@@ -332,16 +438,18 @@ namespace Shortcut
             return serializableNodes;
         }
 
+
         /// <summary>
         /// Reconstructs TreeView nodes from a list of serializable data objects.
         /// </summary>
-        private void BuildTreeNodesFromSerializableData(TreeNodeCollection parentNodes, List<SerializableTreeNodeData> serializableData)
+        private void BuildTreeNodesFromSerializableData(TreeNodeCollection parentNodes
+            , List<SerializableTreeNodeData> serializableData)
         {
             foreach (SerializableTreeNodeData data in serializableData)
             {
                 TreeNode newNode = new TreeNode(data.ItemData.Name);
                 newNode.Tag = data.ItemData;
-
+                TreeItem treeItem = newNode.Tag as TreeItem;
                 // You need a method here to re-assign icons based on data.ItemData.FullPath and data.ItemData.IsDrive
                 // AssignNodeIcon(newNode, data.ItemData.FullPath, data.ItemData.IsDrive);
 
@@ -349,15 +457,37 @@ namespace Shortcut
                 {
                     BuildTreeNodesFromSerializableData(newNode.Nodes, data.Children);
                 }
-                else
+                //else
+                //{
+                //    // Add dummy "Loading..." node if it's a directory/drive but wasn't expanded when saved
+                //    if (Directory.Exists(data.ItemData.FullPath))
+                //    {
+                //        newNode.Nodes.Add("Loading...");
+                //    }
+                //}
+
+                // Get icon and add to ImageList
+                Icon icon = utils.GetFileIcon(treeItem.FullPath);
+                string imageKey = "folder";
+                if (icon != null && treeItem.IsFile)
                 {
-                    // Add dummy "Loading..." node if it's a directory/drive but wasn't expanded when saved
-                    if (data.ItemData.IsDrive || Directory.Exists(data.ItemData.FullPath))
+                    string iconExtension = Path.GetExtension(treeItem.FullPath);
+                    nodeImageList.Images.Add(iconExtension, icon);
+                    imageKey = iconExtension;
+                } 
+                else 
+                {
+                    if (data.IsExpanded)
                     {
-                        newNode.Nodes.Add("Loading...");
-                    }
+                        nodesToExpandOnShown.Add(newNode);
+                        imageKey = "open-folder";
+                    }    
                 }
+
+                newNode.ImageKey = imageKey;
+                newNode.SelectedImageKey = imageKey;
                 parentNodes.Add(newNode);
+                
             }
         }
 
@@ -406,9 +536,9 @@ namespace Shortcut
 
                     driveNode.Text = displayName;
 
-                    // --- Assign a new FolderItem instance to the Tag property ---
+                    // --- Assign a new TreeItem instance to the Tag property ---
                     // This stores custom data with the TreeNode, required for serialization.
-                    driveNode.Tag = new FolderItem(displayName, driveName, true); // true indicates it's a drive
+                    driveNode.Tag = new TreeItem(displayName, driveName, true); // true indicates it's a drive
                     // -------------------------------------------------------------
 
                     // Assign the correct system icon for the drive to the node
@@ -462,7 +592,309 @@ namespace Shortcut
             treeViewFiles.SelectedNode = null;
         }
 
-    }
+        private void openFile_Click(object sender, EventArgs e)
+        {
+            TreeNode selectedNode = treeViewFiles.SelectedNode;
+            if (selectedNode == null || selectedNode.Tag is TreeItem)
+            {
+                MessageBox.Show("Please select the file you want to open.", "Warning",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
 
-    
+            TreeItem TreeItem = (TreeItem)selectedNode.Tag;
+            OpenFile(TreeItem.FullPath);
+        }
+
+        private void treeViewFiles_DoubleClick(object sender, EventArgs e)
+        {
+            TreeNode selectedNode = treeViewFiles.SelectedNode;
+            if (selectedNode != null && selectedNode.Tag is TreeItem)
+            {
+                TreeItem treeItem = (TreeItem)selectedNode.Tag;
+                if (treeItem.IsFile)
+                {
+                    OpenFile(treeItem.FullPath);
+                }
+            }
+        }
+
+        private void OpenFile(string filePath)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(filePath);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Unable to open file: " + ex.Message, "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void Manual_Shown(object sender, EventArgs e)
+        {
+            // --- Perform actual expansion after the form is fully visible and rendered ---
+            foreach (TreeNode node in nodesToExpandOnShown)
+            {
+                if (node != null && node.TreeView != null) // Ensure node is still valid and in a TreeView
+                {
+                    node.Expand();
+                }
+            }
+            nodesToExpandOnShown.Clear(); // Clear the list after expanding
+        }
+
+        private void treeViewFiles_ItemDrag(object sender, ItemDragEventArgs e)
+        {
+            // Store the node being dragged
+            _draggedNode = e.Item as TreeNode;
+
+            if (_draggedNode != null)
+            {
+                System.Diagnostics.Debug.WriteLine("Item drag");
+                // Start the drag-and-drop operation.
+                // Allowed effects: Copy (Ctrl key down) or Move (default).
+                // DoDragDrop() returns once the drop is complete or cancelled.
+                DragDropEffects result = DoDragDrop(e.Item, DragDropEffects.Move | DragDropEffects.Copy);
+                // Clear the dragged node reference after the drag operation, regardless of outcome.
+                _draggedNode = null;
+            }
+        }
+
+        private void treeViewFiles_DragEnter(object sender, DragEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine("Drag enter()");
+            System.Diagnostics.Debug.WriteLine(e.Data.GetDataPresent(typeof(TreeNode)));
+            // Check if the data being dragged is a TreeNode
+            if (e.Data.GetDataPresent(typeof(TreeNode)))
+            {
+                System.Diagnostics.Debug.WriteLine("typeof(TreeNode)");
+                System.Diagnostics.Debug.WriteLine("KeyState " + (e.KeyState & 8));
+                // Set the allowed drag effects based on modifier keys
+                if ((e.KeyState & 8) == 8) // Ctrl key is down (check KeyState value for Ctrl)
+                {
+                    e.Effect = DragDropEffects.Copy; // Copy operation
+                }
+                else
+                {
+                    e.Effect = DragDropEffects.Move; // Move operation
+                }
+            }
+            else
+            {
+                e.Effect = DragDropEffects.None; // Not a TreeNode, no drag allowed
+            }
+        }
+
+        private void treeViewFiles_DragOver(object sender, DragEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine("Drag over()");
+            // Get the node under the mouse cursor
+            Point targetPoint = treeViewFiles.PointToClient(new Point(e.X, e.Y));
+            TreeNode targetNode = treeViewFiles.GetNodeAt(targetPoint);
+
+            // Determine the drag effect
+            if ((e.KeyState & 8) == 8) // Ctrl key is down
+            {
+                e.Effect = DragDropEffects.Copy;
+            }
+            else
+            {
+                e.Effect = DragDropEffects.Move;
+            }
+
+            // Provide visual feedback: highlight the target node
+            if (targetNode != null && targetNode != _draggedNode && !IsDescendant(_draggedNode, targetNode))
+            {
+                treeViewFiles.SelectedNode = targetNode; // Highlight target node
+            }
+            else
+            {
+                treeViewFiles.SelectedNode = null; // Clear highlight if over invalid target
+                e.Effect = DragDropEffects.None; // No valid drop target
+            }
+        }
+
+        private void treeViewFiles_DragDrop(object sender, DragEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine("Drag drop()");
+            // Get the node under the mouse cursor where the drop occurred
+            Point targetPoint = treeViewFiles.PointToClient(new Point(e.X, e.Y));
+            TreeNode targetNode = treeViewFiles.GetNodeAt(targetPoint);
+
+            // Get the node that was dragged
+            _draggedNode = e.Data.GetData(typeof(TreeNode)) as TreeNode;
+
+            // Validate drop operation
+            if (_draggedNode == null || targetNode == null || targetNode == _draggedNode || IsDescendant(_draggedNode, targetNode))
+            {
+                return; // Invalid drop
+            }
+
+            // Perform Move or Copy
+            if (e.Effect == DragDropEffects.Move)
+            {
+                // Remove the node from its original parent
+                _draggedNode.Remove();
+                // Add the node to the new target node
+                targetNode.Nodes.Add(_draggedNode);
+            }
+            else if (e.Effect == DragDropEffects.Copy)
+            {
+                // Create a clone of the dragged node for copying
+                TreeNode clonedNode = (TreeNode)_draggedNode.Clone();
+                targetNode.Nodes.Add(clonedNode);
+            }
+
+            targetNode.ExpandAll(); // Expand the target node to show the dropped item
+            treeViewFiles.SelectedNode = _draggedNode; // Select the dropped/moved node
+            _draggedNode = null; // Clear the dragged node reference
+        }
+
+        /// <summary>
+        /// Helper method to check if a target node is a descendant of the dragged node.
+        /// (Prevents dragging a parent node into its own child)
+        /// </summary>
+        /// <param name="parent">The potential parent node.</param>
+        /// <param name="child">The potential child node.</param>
+        /// <returns>True if child is a descendant of parent, false otherwise.</returns>
+        private bool IsDescendant(TreeNode parent, TreeNode child)
+        {
+            System.Diagnostics.Debug.WriteLine("IsDescendant()");
+            if (child.Parent == null)
+            {
+                return false; // Reached root, child is not a descendant
+            }
+            if (child.Parent == parent)
+            {
+                return true; // Child's immediate parent is 'parent'
+            }
+            return IsDescendant(parent, child.Parent); // Recursively check up the hierarchy
+        }
+
+        private void treeViewFiles_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                deleteTreeNodeItem();
+            }
+            else if (e.KeyCode == Keys.F2)
+            {
+                // Ensure a node is currently selected
+                if (treeViewFiles.SelectedNode != null)
+                {
+                    // Start editing the label of the selected node
+                    treeViewFiles.SelectedNode.BeginEdit();
+                }
+            }
+
+        }
+
+        private void deleteTreeNodeItem()
+        {
+            TreeNode selectedNode = treeViewFiles.SelectedNode;
+            if (selectedNode == null)
+            {
+                MessageBox.Show("Please select the item you want to delete.", "Warning",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            string itemType = (selectedNode.Tag is TreeItem) ? "Folder" : "File";
+            DialogResult result = MessageBox.Show(
+                string.Format("Delete {0} '{1}'?", itemType, selectedNode.Text),
+                "Confirm delete",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (result == DialogResult.Yes)
+            {
+                toolStripStatusLabel1.Text = "Delete " + selectedNode.Text;
+                selectedNode.Remove();
+            }
+        }
+
+        private void treeViewFiles_MouseDown(object sender, MouseEventArgs e)
+        {
+            // Get the TreeNode that was hit by the mouse click
+            // GetNodeAt() returns null if no node is at the specified coordinates.
+            TreeNode clickedNode = treeViewFiles.GetNodeAt(e.X, e.Y);
+
+            // If clickedNode is null, it means the click was on an empty area
+            if (clickedNode == null)
+            {
+                // Programmatically set SelectedNode to null to unselect any currently selected node.
+                treeViewFiles.SelectedNode = null;
+            }
+            else
+            {
+                toolStripStatusLabel1.Text = clickedNode.FullPath;
+            }
+            
+        }
+
+        private void treeViewFiles_AfterLabelEdit(object sender, NodeLabelEditEventArgs e)
+        {
+            // e.Label contains the new text entered by the user.
+            // If e.Label is null, it means the user cancelled the edit (e.g., by pressing Esc).
+            if (e.Label != null && e.Label.Trim().Length > 0)
+            {
+                // Update your underlying data (e.g., the Name property in your FolderItem/FileItem)
+                // This is crucial for keeping your data model in sync with the UI.
+                TreeItem item = e.Node.Tag as TreeItem;
+                if (item != null)
+                {
+                    item.Name = e.Label.Trim(); // Update the Name in your data object
+
+                    // Also update the Text property of the node (e.Node.Text = e.Label.Trim();)
+                    // This is usually done automatically by the TreeView if e.CancelEdit is false.
+                }
+
+                // MessageBox.Show(string.Format("Node '{0}' renamed to '{1}'.", e.Node.Text, e.Label), "Renamed", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                e.CancelEdit = true; // Cancel the edit if the new label is empty or null
+            }
+        }
+
+        private void exportToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Title = "Save tree node to XML file"; // Dialog window title
+            saveFileDialog.Filter = "XML Files (*.xml)|*.xml"; // File type filter
+            saveFileDialog.FilterIndex = 1; // Default selected filter (Text Files)
+            saveFileDialog.RestoreDirectory = true; // Restores the directory to the previously selected one
+
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                string saveFilePath = saveFileDialog.FileName;
+                SaveFileXML(saveFilePath);
+                toolStripStatusLabel1.Text = string.Format("Save XML to {0}", saveFilePath);
+            }
+        }
+
+        private void importToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // --- 1. Create an instance of OpenFileDialog ---
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+
+            // --- 2. Configure dialog properties ---
+            openFileDialog.Title = "Select tree node XML"; // Dialog window title
+            openFileDialog.Filter = "XML Files (*.xml)|*.xml"; // File type filter
+            openFileDialog.FilterIndex = 1; // Default selected filter (Text Files)
+            openFileDialog.RestoreDirectory = true; // Restores the directory to the previously selected one
+
+            // --- 3. Show the dialog and check the result ---
+            // ShowDialog() returns a DialogResult value indicating how the dialog was closed.
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                // User clicked OK and selected a file
+                string selectedFilePath = openFileDialog.FileName; // Get the full path of the selected file
+                ReadFileXML(selectedFilePath);
+                toolStripStatusLabel1.Text = string.Format("Load XML from {0}", selectedFilePath);
+            }
+        }
+    }
 }

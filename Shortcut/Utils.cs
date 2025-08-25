@@ -72,12 +72,10 @@ namespace Shortcut
             if (File.Exists(filePath))
             {
                 FileInfo fileInfo = new FileInfo(filePath);
-                FileItem item = new FileItem();
-                item.FilePath = filePath;
-                item.FileName = fileInfo.Name;
-                item.DisplayName = fileInfo.Name;
-                item.FileSize = fileInfo.Length;
-                item.FileType = GetFileType(filePath);
+                TreeItem item = new TreeItem(fileInfo.Name, filePath, true);
+                //item.DisplayName = fileInfo.Name;
+                //item.FileSize = fileInfo.Length;
+                //item.FileType = GetFileType(filePath);
 
                 // Get icon and add to ImageList
                 Icon icon = GetFileIcon(filePath);
@@ -87,12 +85,12 @@ namespace Shortcut
                     imageList.Images.Add(imageKey, icon);
                 }
 
-                TreeNode fileNode = new TreeNode(item.DisplayName);
+                TreeNode fileNode = new TreeNode(item.Name);
                 fileNode.Tag = item;
                 fileNode.ImageKey = imageKey;
                 fileNode.SelectedImageKey = imageKey;
-                fileNode.ToolTipText = string.Format("{0}\nประเภท: {1}\nขนาด: {2}\nเส้นทาง: {3}",
-                    item.FileName, item.FileType, FormatFileSize(item.FileSize), item.FilePath);
+                //fileNode.ToolTipText = string.Format("{0}\nประเภท: {1}\nขนาด: {2}\nเส้นทาง: {3}",
+                //    item.FileName, item.FileType, FormatFileSize(item.FileSize), item.FilePath);
 
                 parentNode.Nodes.Add(fileNode);
             }

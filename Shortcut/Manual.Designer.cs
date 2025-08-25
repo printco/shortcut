@@ -40,24 +40,42 @@ namespace Shortcut
             this.renameFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
+            this.openFile = new System.Windows.Forms.ToolStripMenuItem();
             this.nodeImageList = new System.Windows.Forms.ImageList(this.components);
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.contextMenuStrip1.SuspendLayout();
+            this.menuStrip1.SuspendLayout();
+            this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // treeViewFiles
             // 
+            this.treeViewFiles.AllowDrop = true;
             this.treeViewFiles.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.treeViewFiles.ContextMenuStrip = this.contextMenuStrip1;
             this.treeViewFiles.ImageIndex = 0;
             this.treeViewFiles.ImageList = this.nodeImageList;
-            this.treeViewFiles.Location = new System.Drawing.Point(12, 12);
+            this.treeViewFiles.LabelEdit = true;
+            this.treeViewFiles.Location = new System.Drawing.Point(0, 27);
             this.treeViewFiles.Name = "treeViewFiles";
             this.treeViewFiles.SelectedImageIndex = 0;
-            this.treeViewFiles.Size = new System.Drawing.Size(238, 303);
+            this.treeViewFiles.Size = new System.Drawing.Size(262, 275);
             this.treeViewFiles.TabIndex = 0;
+            this.treeViewFiles.AfterLabelEdit += new System.Windows.Forms.NodeLabelEditEventHandler(this.treeViewFiles_AfterLabelEdit);
+            this.treeViewFiles.DoubleClick += new System.EventHandler(this.treeViewFiles_DoubleClick);
+            this.treeViewFiles.DragDrop += new System.Windows.Forms.DragEventHandler(this.treeViewFiles_DragDrop);
+            this.treeViewFiles.MouseDown += new System.Windows.Forms.MouseEventHandler(this.treeViewFiles_MouseDown);
+            this.treeViewFiles.DragEnter += new System.Windows.Forms.DragEventHandler(this.treeViewFiles_DragEnter);
+            this.treeViewFiles.KeyUp += new System.Windows.Forms.KeyEventHandler(this.treeViewFiles_KeyUp);
+            this.treeViewFiles.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.treeViewFiles_ItemDrag);
+            this.treeViewFiles.DragOver += new System.Windows.Forms.DragEventHandler(this.treeViewFiles_DragOver);
             // 
             // contextMenuStrip1
             // 
@@ -70,7 +88,7 @@ namespace Shortcut
             this.renameFolder,
             this.deleteItem,
             this.toolStripSeparator2,
-            this.toolStripMenuItem4});
+            this.openFile});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(143, 154);
             // 
@@ -124,37 +142,91 @@ namespace Shortcut
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(139, 6);
             // 
-            // toolStripMenuItem4
+            // openFile
             // 
-            this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-            this.toolStripMenuItem4.Size = new System.Drawing.Size(142, 22);
-            this.toolStripMenuItem4.Text = "Open";
+            this.openFile.Name = "openFile";
+            this.openFile.Size = new System.Drawing.Size(142, 22);
+            this.openFile.Text = "Open";
+            this.openFile.Click += new System.EventHandler(this.openFile_Click);
             // 
             // nodeImageList
             // 
             this.nodeImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("nodeImageList.ImageStream")));
             this.nodeImageList.TransparentColor = System.Drawing.Color.Transparent;
-            this.nodeImageList.Images.SetKeyName(0, "folder2.png");
-            this.nodeImageList.Images.SetKeyName(1, "root.png");
-            this.nodeImageList.Images.SetKeyName(2, "open-folder.png");
-            this.nodeImageList.Images.SetKeyName(3, "shortcut.png");
-            this.nodeImageList.Images.SetKeyName(4, "file.png");
+            this.nodeImageList.Images.SetKeyName(0, "folder.png");
+            // 
+            // menuStrip1
+            // 
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fileToolStripMenuItem});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(262, 24);
+            this.menuStrip1.TabIndex = 1;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // fileToolStripMenuItem
+            // 
+            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.exportToolStripMenuItem,
+            this.importToolStripMenuItem});
+            this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fileToolStripMenuItem.Text = "File";
+            // 
+            // exportToolStripMenuItem
+            // 
+            this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
+            this.exportToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.exportToolStripMenuItem.Text = "Export";
+            this.exportToolStripMenuItem.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
+            // 
+            // importToolStripMenuItem
+            // 
+            this.importToolStripMenuItem.Name = "importToolStripMenuItem";
+            this.importToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.importToolStripMenuItem.Text = "Import";
+            this.importToolStripMenuItem.Click += new System.EventHandler(this.importToolStripMenuItem_Click);
+            // 
+            // statusStrip1
+            // 
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusLabel1});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 305);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(262, 22);
+            this.statusStrip1.TabIndex = 2;
+            this.statusStrip1.Text = "statusStrip1";
+            // 
+            // toolStripStatusLabel1
+            // 
+            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(0, 17);
             // 
             // Manual
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(262, 327);
+            this.Controls.Add(this.statusStrip1);
+            this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.treeViewFiles);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MainMenuStrip = this.menuStrip1;
             this.Name = "Manual";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
-            this.Text = "Manual";
+            this.Text = "Shortcut";
             this.Load += new System.EventHandler(this.Manual_Load);
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Manual_MouseClick);
+            this.Shown += new System.EventHandler(this.Manual_Shown);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Manual_FormClosing);
             this.contextMenuStrip1.ResumeLayout(false);
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -168,9 +240,15 @@ namespace Shortcut
         private System.Windows.Forms.ToolStripMenuItem renameFolder;
         private System.Windows.Forms.ToolStripMenuItem deleteItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
+        private System.Windows.Forms.ToolStripMenuItem openFile;
         private System.Windows.Forms.ImageList nodeImageList;
         private System.Windows.Forms.ToolStripMenuItem createFolder;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exportToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem importToolStripMenuItem;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
     }
 }

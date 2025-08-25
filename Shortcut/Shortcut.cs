@@ -58,7 +58,7 @@ namespace Shortcut
             this.treeViewFiles.Name = "treeViewFiles";
             this.treeViewFiles.SelectedImageIndex = 0;
             this.treeViewFiles.ShowNodeToolTips = true;
-            this.treeViewFiles.Size = new System.Drawing.Size(578, 500);
+            this.treeViewFiles.Size = new System.Drawing.Size(579, 319);
             this.treeViewFiles.TabIndex = 1;
             this.treeViewFiles.DoubleClick += new System.EventHandler(this.treeViewFiles_DoubleClick);
             this.treeViewFiles.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeViewFiles_NodeMouseClick);
@@ -71,7 +71,7 @@ namespace Shortcut
             // 
             // btnAddFile
             // 
-            this.btnAddFile.Location = new System.Drawing.Point(130, 530);
+            this.btnAddFile.Location = new System.Drawing.Point(130, 337);
             this.btnAddFile.Name = "btnAddFile";
             this.btnAddFile.Size = new System.Drawing.Size(100, 30);
             this.btnAddFile.TabIndex = 3;
@@ -81,7 +81,7 @@ namespace Shortcut
             // 
             // btnRemoveItem
             // 
-            this.btnRemoveItem.Location = new System.Drawing.Point(370, 530);
+            this.btnRemoveItem.Location = new System.Drawing.Point(370, 337);
             this.btnRemoveItem.Name = "btnRemoveItem";
             this.btnRemoveItem.Size = new System.Drawing.Size(100, 30);
             this.btnRemoveItem.TabIndex = 5;
@@ -91,7 +91,7 @@ namespace Shortcut
             // 
             // btnOpenFile
             // 
-            this.btnOpenFile.Location = new System.Drawing.Point(490, 530);
+            this.btnOpenFile.Location = new System.Drawing.Point(490, 337);
             this.btnOpenFile.Name = "btnOpenFile";
             this.btnOpenFile.Size = new System.Drawing.Size(100, 30);
             this.btnOpenFile.TabIndex = 6;
@@ -101,7 +101,7 @@ namespace Shortcut
             // 
             // btnCreateFolder
             // 
-            this.btnCreateFolder.Location = new System.Drawing.Point(12, 530);
+            this.btnCreateFolder.Location = new System.Drawing.Point(12, 337);
             this.btnCreateFolder.Name = "btnCreateFolder";
             this.btnCreateFolder.Size = new System.Drawing.Size(100, 30);
             this.btnCreateFolder.TabIndex = 2;
@@ -111,7 +111,7 @@ namespace Shortcut
             // 
             // btnRenameItem
             // 
-            this.btnRenameItem.Location = new System.Drawing.Point(250, 530);
+            this.btnRenameItem.Location = new System.Drawing.Point(250, 337);
             this.btnRenameItem.Name = "btnRenameItem";
             this.btnRenameItem.Size = new System.Drawing.Size(100, 30);
             this.btnRenameItem.TabIndex = 4;
@@ -126,13 +126,13 @@ namespace Shortcut
             // 
             // ShortcutForm
             // 
-            this.ClientSize = new System.Drawing.Size(606, 561);
+            this.ClientSize = new System.Drawing.Size(603, 376);
             this.Controls.Add(this.treeViewFiles);
             this.Controls.Add(this.btnCreateFolder);
+            this.Controls.Add(this.btnOpenFile);
             this.Controls.Add(this.btnAddFile);
             this.Controls.Add(this.btnRenameItem);
             this.Controls.Add(this.btnRemoveItem);
-            this.Controls.Add(this.btnOpenFile);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "ShortcutForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -167,19 +167,19 @@ namespace Shortcut
         {
             // Create root nodes with Windows-style icons
             TreeNode documentsNode = new TreeNode("เอกสาร");
-            documentsNode.Tag = new FolderItem("เอกสาร");
+            documentsNode.Tag = new FolderItem("เอกสาร", "เอกสาร", true);
             documentsNode.ImageKey = "folder";
             documentsNode.SelectedImageKey = "folder_open";
             treeViewFiles.Nodes.Add(documentsNode);
 
             TreeNode applicationsNode = new TreeNode("โปรแกรม");
-            applicationsNode.Tag = new FolderItem("โปรแกรม");
+            applicationsNode.Tag = new FolderItem("โปรแกรม", "โปรแกรม", true);
             applicationsNode.ImageKey = "folder";
             applicationsNode.SelectedImageKey = "folder_open";
             treeViewFiles.Nodes.Add(applicationsNode);
 
             TreeNode mediaNode = new TreeNode("สื่อ");
-            mediaNode.Tag = new FolderItem("สื่อ");
+            mediaNode.Tag = new FolderItem("สื่อ", "สื่อ", true);
             mediaNode.ImageKey = "folder";
             mediaNode.SelectedImageKey = "folder_open";
             treeViewFiles.Nodes.Add(mediaNode);
@@ -247,7 +247,7 @@ namespace Shortcut
             if (!string.IsNullOrEmpty(inputName))
             {
                 TreeNode newFolderNode = new TreeNode(inputName);
-                newFolderNode.Tag = new FolderItem(inputName);
+                newFolderNode.Tag = new FolderItem(inputName, selectedNode.FullPath, false);
                 newFolderNode.ImageKey = "folder";
                 newFolderNode.SelectedImageKey = "folder_open";
 
@@ -330,12 +330,12 @@ namespace Shortcut
                 if (selectedNode.Tag is FolderItem)
                 {
                     FolderItem folderItem = (FolderItem)selectedNode.Tag;
-                    folderItem.FolderName = newName;
+                    folderItem.Name = newName;
                 }
                 else if (selectedNode.Tag is FileItem)
                 {
                     FileItem fileItem = (FileItem)selectedNode.Tag;
-                    fileItem.DisplayName = newName;
+                    fileItem.Name = newName;
                 }
             }
         }
@@ -374,7 +374,7 @@ namespace Shortcut
             }
 
             FileItem fileItem = (FileItem)selectedNode.Tag;
-            OpenFile(fileItem.FilePath);
+            OpenFile(fileItem.FullPath);
         }
 
         private void treeViewFiles_DoubleClick(object sender, EventArgs e)
@@ -420,10 +420,9 @@ namespace Shortcut
                 FileInfo fileInfo = new FileInfo(filePath);
                 FileItem item = new FileItem();
                 item.FilePath = filePath;
-                item.FileName = fileInfo.Name;
-                item.DisplayName = fileInfo.Name;
-                item.FileSize = fileInfo.Length;
-                item.FileType = GetFileType(filePath);
+                item.Name = fileInfo.Name;
+                //item.FileSize = fileInfo.Length;
+                //item.FileType = GetFileType(filePath);
 
                 // Get icon and add to ImageList
                 Icon icon = GetFileIcon(filePath);
@@ -433,12 +432,12 @@ namespace Shortcut
                     imageList.Images.Add(imageKey, icon);
                 }
 
-                TreeNode fileNode = new TreeNode(item.DisplayName);
+                TreeNode fileNode = new TreeNode(item.Name);
                 fileNode.Tag = item;
                 fileNode.ImageKey = imageKey;
                 fileNode.SelectedImageKey = imageKey;
-                fileNode.ToolTipText = string.Format("{0}\nประเภท: {1}\nขนาด: {2}\nเส้นทาง: {3}",
-                    item.FileName, item.FileType, FormatFileSize(item.FileSize), item.FilePath);
+                //fileNode.ToolTipText = string.Format("{0}\nประเภท: {1}\nขนาด: {2}\nเส้นทาง: {3}",
+                //    item.Name, item.FileType, FormatFileSize(item.FileSize), item.FilePath);
 
                 parentNode.Nodes.Add(fileNode);
             }
@@ -655,45 +654,4 @@ namespace Shortcut
             public string szTypeName;
         };
     }
-
-    // Helper classes for tree items
-    public class FileItem
-    {
-        private string filePath;
-        private string fileName;
-        private string displayName;
-        private long fileSize;
-        private string fileType;
-
-        public string FilePath
-        {
-            get { return filePath; }
-            set { filePath = value; }
-        }
-
-        public string FileName
-        {
-            get { return fileName; }
-            set { fileName = value; }
-        }
-
-        public string DisplayName
-        {
-            get { return displayName; }
-            set { displayName = value; }
-        }
-
-        public long FileSize
-        {
-            get { return fileSize; }
-            set { fileSize = value; }
-        }
-
-        public string FileType
-        {
-            get { return fileType; }
-            set { fileType = value; }
-        }
-    }
-
 }
