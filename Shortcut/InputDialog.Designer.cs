@@ -40,6 +40,7 @@ namespace Shortcut
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(274, 20);
             this.textBox1.TabIndex = 0;
+            this.textBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox1_KeyDown);
             // 
             // cancelButton
             // 
@@ -64,6 +65,7 @@ namespace Shortcut
             // 
             // InputDialog
             // 
+            this.AcceptButton = this.okButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(298, 80);
@@ -76,6 +78,7 @@ namespace Shortcut
             this.Name = "InputDialog";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Input";
+            this.Shown += new System.EventHandler(this.InputDialog_Shown);
             this.ResumeLayout(false);
             this.PerformLayout();
 

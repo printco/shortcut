@@ -22,6 +22,7 @@ namespace Shortcut
         private List<TreeNode> nodesToExpandOnShown = new List<TreeNode>();
         // Keep track of the node being dragged
         private TreeNode _draggedNode;
+        private TreeNode _overNode;
 
         public Manual()
         {
@@ -708,6 +709,7 @@ namespace Shortcut
             if (targetNode != null && targetNode != _draggedNode && !IsDescendant(_draggedNode, targetNode))
             {
                 treeViewFiles.SelectedNode = targetNode; // Highlight target node
+                _overNode = targetNode; // Keep select node for parent
             }
             else
             {
@@ -725,11 +727,47 @@ namespace Shortcut
 
             // Get the node that was dragged
             _draggedNode = e.Data.GetData(typeof(TreeNode)) as TreeNode;
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
 
+            if (_overNode != null && files != null)
+            {
+                foreach (string file in files){
+                    string baseName = Path.GetFileName(file);
+                    TreeNode newNode = new TreeNode(baseName);
+                    Icon icon = utils.GetFileIcon(file);
+                    string imageKey = "object";
+                    if (icon != null)
+                    {
+                        string iconExtension = Path.GetExtension(file);
+                        nodeImageList.Images.Add(iconExtension, icon);
+                        imageKey = iconExtension;
+                    }
+                    TreeItem fileItem = new TreeItem();
+                    fileItem.Name = baseName;
+                    fileItem.IsFile = true;
+                    fileItem.FullPath = file;
+
+                    newNode.Text = baseName;
+                    newNode.Tag = fileItem;
+                    newNode.ImageKey = imageKey;
+                    newNode.SelectedImageKey = imageKey;
+                    _overNode.Nodes.Add(newNode); 
+                }
+            }
             // Validate drop operation
-            if (_draggedNode == null || targetNode == null || targetNode == _draggedNode || IsDescendant(_draggedNode, targetNode))
+            else if (_draggedNode == null 
+                || targetNode == null 
+                || targetNode == _draggedNode 
+                || IsDescendant(_draggedNode, targetNode))
             {
                 return; // Invalid drop
+            }
+
+            TreeItem targetNodeItem = (TreeItem) targetNode.Tag;
+            if (targetNodeItem.IsFile)
+            {
+                MessageBox.Show(this, "Could not drop in to file");
+                return;
             }
 
             // Perform Move or Copy
@@ -895,6 +933,22 @@ namespace Shortcut
                 ReadFileXML(selectedFilePath);
                 toolStripStatusLabel1.Text = string.Format("Load XML from {0}", selectedFilePath);
             }
+        }
+
+        private void expandAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            treeViewFiles.ExpandAll();
+        }
+
+        private void collapeAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            treeViewFiles.CollapseAll();
+        }
+
+        private void aboutToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            AboutBox about = new AboutBox();
+            about.ShowDialog();
         }
     }
 }

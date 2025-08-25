@@ -16,6 +16,7 @@ namespace Shortcut
         public InputDialog()
         {
             InitializeComponent();
+
         }
 
         public string getValue()
@@ -30,12 +31,22 @@ namespace Shortcut
 
         private void okButton_Click(object sender, EventArgs e)
         {
+            submit();
+        }
+
+        private void InputDialog_Shown(object sender, EventArgs e)
+        {
+            textBox1.Focus(); // Keep focus on the textbox
+        }
+
+        private void submit()
+        {
             // --- Input Validation Logic ---
             if (string.IsNullOrEmpty(textBox1.Text) || textBox1.Text.Trim().Length == 0)
             {
                 // Input is empty or just whitespace
                 MessageBox.Show("Please enter some data before pressing OK.", "Input Required", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                textBox1.Focus(); // Keep focus on the textbox
+
                 this.DialogResult = DialogResult.None; // Prevent the form from closing
                 // (This overrides the DialogResult set in the designer)
             }
@@ -44,6 +55,19 @@ namespace Shortcut
                 // Input is valid, allow the form to close with OK result
                 this.DialogResult = DialogResult.OK; // Explicitly set DialogResult to OK
                 this.value = textBox1.Text;
+            }
+        }
+
+        private void textBox1_KeyDown(object sender, KeyEventArgs e)
+        {
+            // Check if the Enter key was pressed
+            if (e.KeyCode == Keys.Enter)
+            {
+                // This simulates a click on the OK button
+                okButton.PerformClick();
+
+                // Prevents the "ding" sound that often occurs with the Enter key
+                e.SuppressKeyPress = true;
             }
         }
     }
