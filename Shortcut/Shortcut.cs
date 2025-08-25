@@ -156,9 +156,9 @@ namespace Shortcut
                     treeViewFiles.Nodes.Add(nodeFromSelect);
                     selectedNode = nodeFromSelect;
                     treeViewFiles.SelectedNode = selectedNode;
-                    RecursiveFolder(selectedNode, selectedFolderPath, 0);
                 }
 
+                RecursiveFolder(selectedNode, selectedFolderPath, 0);
             }
         }
 

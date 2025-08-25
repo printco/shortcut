@@ -70,5 +70,18 @@ namespace Shortcut
                 e.SuppressKeyPress = true;
             }
         }
+
+        private void InputDialog_KeyDown(object sender, KeyEventArgs e)
+        {
+            // Check if the Escape key was pressed
+            if (e.KeyCode == Keys.Escape)
+            {
+                this.DialogResult = DialogResult.Cancel;
+                this.Close();
+
+                // Indicate that you have handled the event
+                e.Handled = true;
+            }
+        }
     }
 }
