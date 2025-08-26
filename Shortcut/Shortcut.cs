@@ -866,6 +866,7 @@ namespace Shortcut
             {
                 // Programmatically set SelectedNode to null to unselect any currently selected node.
                 treeViewFiles.SelectedNode = null;
+                statusLabel.Text = "No select item";
             }
             else
             {
