@@ -23,6 +23,7 @@ namespace Shortcut
         // Keep track of the node being dragged
         private TreeNode _draggedNode;
         private TreeNode _overNode;
+        private string _textPlaceHolder = "Search";
 
         public Shortcut()
         {
@@ -142,7 +143,7 @@ namespace Shortcut
             if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
             {
                 string selectedFolderPath = folderBrowserDialog.SelectedPath; // Get the full path of the selected folder
-                toolStripStatusLabel1.Text = selectedFolderPath;
+                statusLabel.Text = selectedFolderPath;
 
                 if (selectedNode == null)
                 {
@@ -297,10 +298,9 @@ namespace Shortcut
                 {
                     string nodeName = inputDlg.getValue();
                     TreeNode newParentNode = new TreeNode(nodeName);
-                    newParentNode.Tag = new TreeItem(nodeName, nodeName, true);
-                    int imageIndex = inputDlg.getImageIndex();
-                    newParentNode.ImageIndex = imageIndex;
-                    newParentNode.SelectedImageIndex = imageIndex;
+                    newParentNode.Tag = new TreeItem(nodeName, nodeName, false);
+                    newParentNode.ImageKey = "folder.png";
+                    newParentNode.SelectedImageKey = "folder.png";
                     treeViewFiles.Nodes.Add(newParentNode);
                 }
                 this.BringToFront();
@@ -318,8 +318,8 @@ namespace Shortcut
                     newFolderNode.Tag = new TreeItem(inputName
                         , selectedNode.FullPath + treeViewFiles.PathSeparator + inputName
                         , false);
-                    newFolderNode.ImageKey = "folder";
-                    newFolderNode.SelectedImageKey = "open-folder";
+                    newFolderNode.ImageKey = "folder.png";
+                    newFolderNode.SelectedImageKey = "folder.png";
 
                     if (selectedNode != null)
                     {
@@ -343,6 +343,7 @@ namespace Shortcut
         {
             string filePath = Path.Combine(Application.LocalUserAppDataPath, TreeDataFileName);
             ReadFileXML(filePath);
+            statusLabel.Text = "Load XML from " + filePath;
         }
 
         private void ReadFileXML(string filePath)
@@ -466,25 +467,25 @@ namespace Shortcut
                 //        newNode.Nodes.Add("Loading...");
                 //    }
                 //}
-
-                // Get icon and add to ImageList
-                Icon icon = utils.GetFileIcon(treeItem.FullPath);
-                string imageKey = "folder";
-                if (icon != null && treeItem.IsFile)
+                if (data.IsExpanded)
                 {
-                    string iconExtension = Path.GetExtension(treeItem.FullPath);
-                    nodeImageList.Images.Add(iconExtension, icon);
-                    imageKey = iconExtension;
-                } 
-                else 
-                {
-                    if (data.IsExpanded)
-                    {
-                        nodesToExpandOnShown.Add(newNode);
-                        imageKey = "open-folder";
-                    }    
+                    nodesToExpandOnShown.Add(newNode);
                 }
-
+                // Get icon and add to ImageList
+                Icon icon = treeItem.FullPath != null? utils.GetFileIcon(treeItem.FullPath) : null;
+                string imageKey = "objects.png";
+                if (icon != null)
+                {
+                    imageKey = Path.GetExtension(treeItem.FullPath);
+                    nodeImageList.Images.Add(imageKey, icon);
+                }
+                else
+                {
+                    if (!treeItem.IsFile)
+                    {
+                        imageKey = "folder.png";
+                    }
+                }
                 newNode.ImageKey = imageKey;
                 newNode.SelectedImageKey = imageKey;
                 parentNodes.Add(newNode);
@@ -624,6 +625,7 @@ namespace Shortcut
         {
             try
             {
+                statusLabel.Text = "Starting " + filePath;
                 System.Diagnostics.Process.Start(filePath);
             }
             catch (Exception ex)
@@ -735,7 +737,7 @@ namespace Shortcut
                     string baseName = Path.GetFileName(file);
                     TreeNode newNode = new TreeNode(baseName);
                     Icon icon = utils.GetFileIcon(file);
-                    string imageKey = "object";
+                    string imageKey = "objects.png";
                     if (icon != null)
                     {
                         string iconExtension = Path.GetExtension(file);
@@ -848,7 +850,7 @@ namespace Shortcut
 
             if (result == DialogResult.Yes)
             {
-                toolStripStatusLabel1.Text = "Delete " + selectedNode.Text;
+                statusLabel.Text = "Delete " + selectedNode.Text;
                 selectedNode.Remove();
             }
         }
@@ -867,7 +869,7 @@ namespace Shortcut
             }
             else
             {
-                toolStripStatusLabel1.Text = clickedNode.FullPath;
+                statusLabel.Text = clickedNode.FullPath;
             }
             
         }
@@ -909,7 +911,7 @@ namespace Shortcut
             {
                 string saveFilePath = saveFileDialog.FileName;
                 SaveFileXML(saveFilePath);
-                toolStripStatusLabel1.Text = string.Format("Save XML to {0}", saveFilePath);
+                statusLabel.Text = string.Format("Save XML to {0}", saveFilePath);
             }
         }
 
@@ -931,7 +933,7 @@ namespace Shortcut
                 // User clicked OK and selected a file
                 string selectedFilePath = openFileDialog.FileName; // Get the full path of the selected file
                 ReadFileXML(selectedFilePath);
-                toolStripStatusLabel1.Text = string.Format("Load XML from {0}", selectedFilePath);
+                statusLabel.Text = string.Format("Load XML from {0}", selectedFilePath);
             }
         }
 
@@ -949,6 +951,118 @@ namespace Shortcut
         {
             AboutBox about = new AboutBox();
             about.ShowDialog();
+        }
+
+        private void toolStripTextBox1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void toolStripTextBox1_MouseEnter(object sender, EventArgs e)
+        {
+            if (toolStripTextBox1.Text == _textPlaceHolder)
+            {
+                toolStripTextBox1.Text = "";
+                toolStripTextBox1.ForeColor = SystemColors.WindowText;
+            }
+        }
+
+        private void toolStripTextBox1_MouseLeave(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(toolStripTextBox1.Text))
+            {
+                toolStripTextBox1.Text = _textPlaceHolder;
+                toolStripTextBox1.ForeColor = System.Drawing.SystemColors.GrayText;
+            }
+        }
+
+        private void toolStripTextBox1_KeyDown(object sender, KeyEventArgs e)
+        {
+            // Check if the key pressed is the Enter key
+            if (e.KeyCode == Keys.Enter)
+            {
+                string searchText = toolStripTextBox1.Text;
+                if (string.IsNullOrEmpty(searchText))
+                {
+                    resetSelectedNode();
+                    return;
+                }
+                // Your code to handle the Enter key press
+                TreeNode resultSearchNode = SearchTreeView(treeViewFiles.Nodes, searchText);
+                if (resultSearchNode != null)
+                {
+                    statusLabel.Text = resultSearchNode.FullPath;
+                    HighlightAndExpand(resultSearchNode);
+                }
+                else
+                {
+                    statusLabel.Text = "Not found";
+                }
+                // Prevent the key press from going to other controls
+                e.Handled = true;
+            }
+        }
+
+        private TreeNode SearchTreeView(TreeNodeCollection nodes, string searchText)
+        {
+            foreach (TreeNode node in nodes)
+            {
+                if (node.Text.ToLower().Contains(searchText.ToLower()))
+                {
+                    // Found a match, return the node
+                    return node;
+                }
+
+                // Recursively search the child nodes
+                if (node.Nodes.Count > 0)
+                {
+                    TreeNode childMatch = SearchTreeView(node.Nodes, searchText);
+                    if (childMatch != null)
+                    {
+                        return childMatch;
+                    }
+                }
+            }
+
+            // No match found in this branch
+            return null;
+        }
+
+        private void HighlightAndExpand(TreeNode node)
+        {
+            if (node == null)
+            {
+                return;
+            }
+
+            // Un-highlight any previously selected node
+            if (treeViewFiles.SelectedNode != null)
+            {
+                treeViewFiles.SelectedNode.BackColor = Color.Empty;
+            }
+
+            // Set the found node as the selected node
+            treeViewFiles.SelectedNode = node;
+
+            // Highlight the node with a background color
+            node.BackColor = Color.Yellow;
+
+            // Walk up the parent hierarchy and expand each parent
+            TreeNode parentNode = node.Parent;
+            while (parentNode != null)
+            {
+                parentNode.Expand();
+                parentNode = parentNode.Parent;
+            }
+
+            // Scroll the TreeView to make the node visible
+            node.EnsureVisible();
+        }
+
+        private void resetSelectedNode()
+        {
+            treeViewFiles.SelectedNode.BackColor = Color.Empty;
+            treeViewFiles.SelectedNode = null;
         }
     }
 }

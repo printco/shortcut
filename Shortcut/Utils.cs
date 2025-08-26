@@ -78,17 +78,24 @@ namespace Shortcut
                 //item.FileType = GetFileType(filePath);
 
                 // Get icon and add to ImageList
+
                 Icon icon = GetFileIcon(filePath);
-                string imageKey = "file_" + imageList.Images.Count.ToString();
+                string imageKey = Path.GetExtension(filePath);
+                TreeNode fileNode = new TreeNode(item.Name);
+                fileNode.Tag = item;
+
                 if (icon != null)
                 {
                     imageList.Images.Add(imageKey, icon);
+                    fileNode.ImageKey = imageKey;
+                    fileNode.SelectedImageKey = imageKey;
                 }
-
-                TreeNode fileNode = new TreeNode(item.Name);
-                fileNode.Tag = item;
-                fileNode.ImageKey = imageKey;
-                fileNode.SelectedImageKey = imageKey;
+                else
+                {
+                    // Object image
+                    fileNode.ImageKey = "objects.png";
+                    fileNode.SelectedImageKey = "objects.png";
+                }
                 //fileNode.ToolTipText = string.Format("{0}\nประเภท: {1}\nขนาด: {2}\nเส้นทาง: {3}",
                 //    item.FileName, item.FileType, FormatFileSize(item.FileSize), item.FilePath);
 
