@@ -983,12 +983,13 @@ namespace Shortcut
             if (e.KeyCode == Keys.Enter)
             {
                 string searchText = toolStripTextBox1.Text;
-                if (string.IsNullOrEmpty(searchText))
-                {
-                    resetSelectedNode();
-                    return;
-                }
+                
+                resetSelectedNode(treeViewFiles.Nodes);
+                 
                 // Your code to handle the Enter key press
+                SearchTreeView(treeViewFiles.Nodes, searchText);
+                treeViewFiles.Invalidate();
+                /*
                 TreeNode resultSearchNode = SearchTreeView(treeViewFiles.Nodes, searchText);
                 if (resultSearchNode != null)
                 {
@@ -999,34 +1000,28 @@ namespace Shortcut
                 {
                     statusLabel.Text = "Not found";
                 }
+                */
                 // Prevent the key press from going to other controls
                 e.Handled = true;
             }
         }
 
-        private TreeNode SearchTreeView(TreeNodeCollection nodes, string searchText)
+        private void SearchTreeView(TreeNodeCollection nodes, string searchText)
         {
             foreach (TreeNode node in nodes)
             {
+
                 if (node.Text.ToLower().Contains(searchText.ToLower()))
                 {
-                    // Found a match, return the node
-                    return node;
+                    HighlightAndExpand(node);
                 }
 
                 // Recursively search the child nodes
                 if (node.Nodes.Count > 0)
                 {
-                    TreeNode childMatch = SearchTreeView(node.Nodes, searchText);
-                    if (childMatch != null)
-                    {
-                        return childMatch;
-                    }
+                    SearchTreeView(node.Nodes, searchText);
                 }
             }
-
-            // No match found in this branch
-            return null;
         }
 
         private void HighlightAndExpand(TreeNode node)
@@ -1037,13 +1032,15 @@ namespace Shortcut
             }
 
             // Un-highlight any previously selected node
+            /*
             if (treeViewFiles.SelectedNode != null)
             {
                 treeViewFiles.SelectedNode.BackColor = Color.Empty;
             }
+             */
 
             // Set the found node as the selected node
-            treeViewFiles.SelectedNode = node;
+            //treeViewFiles.SelectedNode = node;
 
             // Highlight the node with a background color
             node.BackColor = Color.Yellow;
@@ -1060,10 +1057,17 @@ namespace Shortcut
             node.EnsureVisible();
         }
 
-        private void resetSelectedNode()
+        private void resetSelectedNode(TreeNodeCollection nodes)
         {
-            treeViewFiles.SelectedNode.BackColor = Color.Empty;
-            treeViewFiles.SelectedNode = null;
+            // clear backcolor for all nodes
+            foreach (TreeNode node in nodes)
+            {
+                node.BackColor = Color.Empty;
+                if (node.Nodes.Count > 0)
+                {
+                    resetSelectedNode(node.Nodes);
+                }
+            }
         }
     }
 }

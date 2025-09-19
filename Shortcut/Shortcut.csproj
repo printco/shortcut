@@ -10,7 +10,7 @@
     <RootNamespace>Shortcut</RootNamespace>
     <AssemblyName>Shortcut</AssemblyName>
     <StartupObject>Shortcut.Program</StartupObject>
-    <ApplicationIcon>app-icon.ico</ApplicationIcon>
+    <ApplicationIcon>curve-arrow.ico</ApplicationIcon>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <ManifestCertificateThumbprint>187E3B171DDCE85286E00CC32921CECD8F3828B4</ManifestCertificateThumbprint>
     <ManifestKeyFile>Shortcut_TemporaryKey.pfx</ManifestKeyFile>
@@ -151,6 +151,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="app-icon.ico" />
+    <Content Include="curve-arrow.ico" />
     <Content Include="shortcut.ico" />
   </ItemGroup>
   <ItemGroup>
